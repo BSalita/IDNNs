@@ -1,6 +1,6 @@
 import multiprocessing
 from idnns.information.mutual_info_estimation import mutual_information
-import entropy_estimators as ee
+from idnns.information import entropy_estimators as ee
 import idnns.information.information_utilities as inf_ut
 import numpy as np
 import tensorflow as tf
@@ -170,7 +170,7 @@ def calc_information_for_epoch(iter_index, interval_information_display, ws_iter
             x = np.zeros((num_of_samples * data.shape[0], 2))
             sigma = 0.5
             for i in range(data.shape[0]):
-                print i
+                print (i)
                 cov_matrix = np.eye(data[i, :].shape[0]) * sigma
                 t_i = np.random.multivariate_normal(data[i, :], cov_matrix, num_of_samples)
                 new_data[num_of_samples * i:(num_of_samples * (i + 1)) , :] = t_i
@@ -253,9 +253,9 @@ def calc_all_sigams(data, sigmas):
     batch_points = np.rint(np.arange(0, data.shape[0] + 1, batchs)).astype(dtype=np.int32)
     I_XT = []
     for sigma in sigmas:
-        #print sigma
+        #print (sigma)
         I_XT_temp = 0
-        for i in xrange(0, len(batch_points) - 1):
+        for i in range(0, len(batch_points) - 1):
             new_data = data[batch_points[i]:batch_points[i + 1], :]
             N = new_data.shape[0]
             d = new_data.shape[1]
@@ -270,9 +270,9 @@ def calc_all_sigams(data, sigmas):
             diff_mat1 = np.sum(np.exp(diff_mat0), axis=0)
             diff_mat2 = -(1.0 / N) * np.sum(np.log2((1.0 / N) * diff_mat1))
             I_XT_temp += diff_mat2 - d * np.log2((sigma ** 2) / (eta ** 2 + sigma ** 2))
-            # print diff_mat2 - d*np.log2((sigma**2)/(eta**2+sigma**2))
+            # print (diff_mat2 - d*np.log2((sigma**2)/(eta**2+sigma**2)))
         I_XT_temp /= len(batch_points)
-        # print I_XT_temp
+        # print (I_XT_temp)
         I_XT.append(I_XT_temp)
     return I_XT
 
@@ -284,7 +284,7 @@ def estimate_IY_by_network(data, labels):
     model = mo.Model(input_size, [400, 100, 50], labels.shape[1], 0.001, '', cov_net=0)
     optimizer = model.optimize
     init = tf.global_variables_initializer()
-    num_of_ephocs = 60
+    num_of_epochs = 60
 
     batch_size = 1024
     batch_points = np.rint(np.arange(0, data.shape[0] + 1, batch_size)).astype(dtype=np.int32)
@@ -294,8 +294,8 @@ def estimate_IY_by_network(data, labels):
     with tf.Session() as sess:
         sess.run(init)
         # Go over the epochs
-        for j in range(0, num_of_ephocs):
-            for i in xrange(0, len(batch_points) - 1):
+        for j in range(0, num_of_epochs):
+            for i in range(0, len(batch_points) - 1):
                 batch_xs = data[batch_points[i]:batch_points[i + 1]]
                 batch_ys = labels[batch_points[i]:batch_points[i + 1]]
                 feed_dict = {model.x: batch_xs, model.labels: batch_ys}
@@ -319,14 +319,14 @@ def calc_varitional_information(data, labels, model_path, layer_numer, num_of_la
                                 search_sigma = False,estimate_y_by_network=False):
     """Calculate estimation of the information using vartional IB"""
     #Assumpations -
-    print 'kkkk'
+    print ('kkkk')
     if search_sigma:
         sigmas = np.linspace(0.01, 0.15,2)
         #sigmas  = [sigmas[2]]
     else:
         sigmas = [sigma]
     I_XT = calc_all_sigams(data, sigmas)
-    print 'ssss'
+    print ('ssss')
     if estimate_y_by_network:
         I_TY = estimate_IY_by_network(data, labels)
     else:

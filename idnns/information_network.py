@@ -1,9 +1,9 @@
 import numpy as np
 from joblib import Parallel, delayed
 import multiprocessing
-import network as nn
+from idnns import network as nn
 import os
-import cPickle
+import pickle
 import shutil
 import re
 import argparse
@@ -40,7 +40,7 @@ def get_default_parser(num_of_samples = None):
                         type=int,help='The number of times to run the network')
 
     parser.add_argument('-num_epochs',
-                        '-e', dest="num_ephocs", default=10000,
+                        '-e', dest="num_epochs", default=10000,
                         type=int, help='max number of epochs')
 
     parser.add_argument('-net',
@@ -130,7 +130,7 @@ class informationNetwork():
         self.cov_net = args.cov_net
         self.calc_information = args.calc_information
         self.run_in_parallel = args.run_in_parallel
-        self.num_ephocs = args.num_ephocs
+        self.num_epochs = args.num_epochs
         self.learning_rate = args.learning_rate
         self.batch_size = args.batch_size
         self.activation_function = args.activation_function
@@ -149,7 +149,7 @@ class informationNetwork():
         self.train_samples = np.linspace(1, 100, 199)[[[x * 2 - 2 for x in index] for index in args.inds]]
         # The indexs that we want to calculate the information for them in logspace interval
         self.epochs_indexes = np.unique(
-            np.logspace(np.log2(args.start_samples), np.log2(args.num_ephocs), args.num_of_samples, dtype=int, base=2)) - 1
+            np.logspace(np.log2(args.start_samples), np.log2(args.num_epochs), args.num_of_samples, dtype=int, base=2)) - 1
         max_size = np.max([len(layers_size) for layers_size in self.layers_sizes])
         #load data
         self.data_sets = nn.load_data(self.name, args.random_labels)
@@ -161,7 +161,7 @@ class informationNetwork():
             [np.zeros((self.num_of_repeats, len(self.layers_sizes), len(self.train_samples), len(self.epochs_indexes))) for _ in range(6)]
 
         params = {'samples_len': len(self.train_samples), 'num_of_disribuation_samples': args.num_of_disribuation_samples,
-                  'layersSizes': self.layers_sizes, 'numEphocs': args.num_ephocs, 'batch': args.batch_size,
+                  'layersSizes': self.layers_sizes, 'numepochs': args.num_epochs, 'batch': args.batch_size,
                   'numRepeats': args.num_of_repeats, 'numEpochsInds': len(self.epochs_indexes),
                   'LastEpochsInds': self.epochs_indexes[-1], 'DataName': args.data_name, 'learningRate': args.learning_rate}
 
@@ -188,7 +188,7 @@ class informationNetwork():
             os.makedirs(directory)
         self.dir_saved = directory
         with open(self.dir_saved +file_to_save , 'wb') as f:
-            cPickle.dump(data, f, protocol=2)
+            pickle.dump(data, f, protocol=2)
 
     def select_network_arch(self,type_net):
         """Selcet the architectures of the networks according to their type
@@ -218,7 +218,7 @@ class informationNetwork():
         if self.run_in_parallel:
             results = Parallel(n_jobs=NUM_CORES)(delayed(nn.train_network)
                                                      (self.layers_sizes[j],
-                                                      self.num_ephocs, self.learning_rate, self.batch_size,
+                                                      self.num_epochs, self.learning_rate, self.batch_size,
                                                       self.epochs_indexes, self.save_grads, self.data_sets, self.activation_function,
                                                       self.train_samples,self.interval_accuracy_display, self.calc_information,
                                                       self.calc_information_last, self.num_of_bins,
@@ -229,7 +229,7 @@ class informationNetwork():
         else:
             results = [nn.train_and_calc_inf_network(i, j,k,
                                                      self.layers_sizes[j],
-                                                     self.num_ephocs, self.learning_rate, self.batch_size,
+                                                     self.num_epochs, self.learning_rate, self.batch_size,
                                                      self.epochs_indexes, self.save_grads, self.data_sets, self.activation_function,
                                                      self.train_samples, self.interval_accuracy_display, self.calc_information,
                                                      self.calc_information_last, self.num_of_bins, self.interval_information_display,
@@ -260,7 +260,7 @@ class informationNetwork():
         """Print the networks params"""
         for val in self.params:
             if val!='epochsInds':
-                print val, self.params[val]
+                print (val, self.params[val])
 
 
     def calc_information(self):

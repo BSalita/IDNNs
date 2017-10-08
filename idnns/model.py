@@ -234,7 +234,7 @@ class Model:
         self.all_layer_sizes = np.copy(layerSize)
         self.all_layer_sizes = np.insert(self.all_layer_sizes, 0, input_size)
         self.num_of_classes = num_of_classes
-        self.num_of_layers = len(layerSize)+1
+        #self.num_of_layers = len(layerSize)+1
         self.learning_rate_local = learning_rate_local
         self.save_file= save_file
         self.hidden = None
@@ -273,9 +273,9 @@ class Model:
         self.hidden.append(output)
         return output
 
-    @property
-    def num_of_layers(self):
-        return self.num_of_layers
+    #@property
+    #patch def num_of_layers(self):
+        #patch return self.num_of_layers
 
     @property
     def hidden_layers(self):
@@ -291,7 +291,7 @@ class Model:
 
                 self._drouput ='dr'
                 #self.hidden.append(self.x)
-                for i in xrange(1, len(self.all_layer_sizes)):
+                for i in range(1, len(self.all_layer_sizes)):
                     name_scope = 'hidden' + str(i-1)
                     row_size, col_size = self.all_layer_sizes[i - 1], self.all_layer_sizes[i]
                     activation_function = self.activation_function
@@ -339,8 +339,8 @@ class Model:
         return cross_entropy
 
     @property
-    def save_file(self):
-        return self.save_file
+    #patch def save_file(self):
+        #patch return self.save_file
 
     def inference(self, data):
         """Return the predication of the network with the given data"""

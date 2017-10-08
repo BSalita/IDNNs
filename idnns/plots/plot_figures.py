@@ -2,7 +2,6 @@
 import matplotlib
 matplotlib.use("TkAgg")
 import numpy as np
-import cPickle
 from scipy.interpolate import interp1d
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
@@ -14,7 +13,8 @@ import os
 import matplotlib.animation as animation
 import math
 import os.path
-import plot_utilities as plt_ut
+import pickle
+from idnns.plots import plot_utilities as plt_ut
 LAYERS_COLORS  = ['red', 'blue', 'green', 'yellow', 'pink', 'orange']
 
 def plot_all_epochs(gen_data, I_XT_array, I_TY_array, axes, epochsInds, f, index_i, index_j, size_ind,
@@ -200,11 +200,11 @@ def get_data(name):
     #new version
     if os.path.isfile(name + 'data.pickle'):
         curent_f = open(name + 'data.pickle', 'rb')
-        d2 = cPickle.load(curent_f)
+        d2 = pickle.load(curent_f)
     #Old version
     else:
         curent_f = open(name, 'rb')
-        d1 = cPickle.load(curent_f)
+        d1 = pickle.load(curent_f)
         data1 = d1[0]
         data =  np.array([data1[:, :, :, :, :, 0], data1[:, :, :, :, :, 1]])
         #Convert log e to log2
@@ -499,7 +499,7 @@ def plot_pearson(name):
     axes.set_ylabel('Abs(Pearson)*sqrt(N_i)')
     rects = axes.patches
     # Now make some labels
-    labels = ["L%d (%d nuerons)" % (i,j) for i,j in zip(xrange(len(rects)), sizes)]
+    labels = ["L%d (%d nuerons)" % (i,j) for i,j in zip(range(len(rects)), sizes)]
     plt.xticks(np.arange(1,7), labels)
 
 
@@ -538,19 +538,19 @@ def plot_gradients(name_s):
     #Go over the layers
     for layer_index in range(0,num_of_layer-1):
         traces_layers, means_layers, p_1, p_0, l2_norms = [], [], [], [], []
-        print layer_index
+        print (layer_index)
         #We want to skip the biasses so we need to go every 2 indexs
         layer = layer_index*2
         #Go over the weights
         for k in range(len(gradients)):
-            #print k
+            #print (k)
             grad = np.squeeze(gradients[k][0][0])
             #ws_in = np.squeeze(ws[k][0][0])
             ws_in = ws[k][0][0]
             cov_traces ,means,means,layer_l2_norm= [], [] ,[],[]
             #Go over all the epochs
             for epoch_number in range(len(ws_in)):
-                print ('epoche number' ,epoch_number)
+                print ('epoch number' ,epoch_number)
                 #the weights of the layer as one-dim vector
                 if type(ws_in[epoch_number][layer_index]) is list:
                     flatted_list = [item for sublist in ws_in[epoch_number][layer_index] for item in sublist]
@@ -600,7 +600,7 @@ def plot_gradients(name_s):
                 #total_w is in size [num_of_total_weights, num of epochs]
                 total_w = np.array(total_w)
                 #c_var.append(np.sqrt(np.trace(np.cov(np.array(total_w).T)))/np.cov(np.array(total_w).T).shape[0])
-                #print np.mean(c_mean).shape
+                #print (np.mean(c_mean).shape)
                 means.append(np.mean(c_mean))
                 cov_traces.append(np.mean(c_var))
                 """
@@ -635,7 +635,7 @@ def extract_array(data, name):
     return results
 
 def update_bars_num_of_ts(num, p_ts, H_Xgt,DKL_YgX_YgT, axes, ind_array):
-    print num
+    print (num)
     axes[1].clear()
     axes[2].clear()
     axes[0].clear()
@@ -666,7 +666,7 @@ def update_bars_num_of_ts(num, p_ts, H_Xgt,DKL_YgX_YgT, axes, ind_array):
     axes[2].set_ylabel('DKL[p(y|x)||p(y|t)]',fontsize = 16)
 
 def update_bars_entropy(num, H_Xgt,DKL_YgX_YgT, axes, ind_array):
-    print num
+    print (num)
     axes[0].clear()
     current_H_Xgt =np.mean(H_Xgt[num], axis=0)
     x = range(len(current_H_Xgt))
@@ -734,7 +734,7 @@ def plot_alphas(str_name, save_name='dist'):
     for i in range(0,20):
         print (i, sigmas[i])
         f1, axes1 = plt.subplots(1, 1)
-        print I_XT_array
+        print (I_XT_array)
         axes1.plot(I_XT_array, I_XT_array_var[:,:,i], linewidth=5)
         axes1.plot([0, 15.1], [0, 15.1], transform=axes1.transAxes)
         axes1.set_title('Sigmma=' +str(sigmas[i]))
@@ -749,7 +749,7 @@ def plot_alphas(str_name, save_name='dist'):
     linestyles  = [ '--', '-.', '-','', ' ',':', '']
     epochs_s =[0, -1]
     for j in epochs_s:
-        print j
+        print (j)
         for i  in range(0, I_XT_array.shape[1]):
 
             axes.plot(sigmas, I_XT_array_var[j,i,:],color = colors[i], linestyle = linestyles[j], label='Layer-'+str(i) +' Epoch - ' +str(epochs_s[j]))
@@ -785,11 +785,11 @@ if __name__ == '__main__':
     do_plot_eig = False
     plot_movie = False
     do_plot_time_stepms = False
-    #str_names = [[prex2+'fo_layersSizes=[[10, 7, 5, 4, 3]]_LastEpochsInds=9998_numRepeats=1_batch=3563_DataName=reg_1_numEphocs=10000_learningRate=0.0004_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/']]
+    #str_names = [[prex2+'fo_layersSizes=[[10, 7, 5, 4, 3]]_LastEpochsInds=9998_numRepeats=1_batch=3563_DataName=reg_1_numepochs=10000_learningRate=0.0004_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/']]
     if action == TIME_STEMPS or action == MOVIE:
         index = 1
-        name_s = prex2+ 'g_layersSizes=[[10, 7, 5, 4, 3]]_LastEpochsInds=9998_numRepeats=40_batch=3563_DataName=var_u_numEphocs=10000_learningRate=0.0002_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/'
-        name_s = prex2 +'r_DataName=MNIST_samples_len=1_layersSizes=[[400, 200, 150, 60, 50, 40, 30]]_learningRate=0.0002_numEpochsInds=677_numRepeats=1_LastEpochsInds=1399_num_of_disribuation_samples=1_numEphocs=1400_batch=2544/'
+        name_s = prex2+ 'g_layersSizes=[[10, 7, 5, 4, 3]]_LastEpochsInds=9998_numRepeats=40_batch=3563_DataName=var_u_numepochs=10000_learningRate=0.0002_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/'
+        name_s = prex2 +'r_DataName=MNIST_samples_len=1_layersSizes=[[400, 200, 150, 60, 50, 40, 30]]_learningRate=0.0002_numEpochsInds=677_numRepeats=1_LastEpochsInds=1399_num_of_disribuation_samples=1_numepochs=1400_batch=2544/'
         if action ==TIME_STEMPS:
             save_name = '3_time_series'
             #plot_snapshots(name_s, save_name, index)
@@ -801,16 +801,16 @@ if __name__ == '__main__':
             mode =11
             save_name = ALL_LAYERS
             str_names = [[prex + 'ff3_5_198.pickle', prex+ 'ff3_4_198.pickle',prex + 'ff3_3_198.pickle'],[prex + 'ff3_2_198.pickle',prex + 'ff3_1_198.pickle',prex + 'ff4_1_10.pickle']]
-            str_names[1][2] = prex2+'g_layersSizes=[[10, 7, 5, 4, 4, 3]]_LastEpochsInds=9998_numRepeats=20_batch=3563_DataName=var_u_numEphocs=10000_learningRate=0.0004_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/'
+            str_names[1][2] = prex2+'g_layersSizes=[[10, 7, 5, 4, 4, 3]]_LastEpochsInds=9998_numRepeats=20_batch=3563_DataName=var_u_numepochs=10000_learningRate=0.0004_numEpochsInds=964_samples=1_num_of_disribuation_samples=1/'
 
 
 
-            str_names = [[prex2 +'nbins8_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/',
-                          prex2 +'nbins12_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/',
-                          prex2 +'nbins18_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/']
-                         ,[prex2 +'nbins25_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/',
-                           prex2 +'nbins35_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/',
-                           prex2 + 'nbins50_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=4096/'                         ]]
+            str_names = [[prex2 +'nbins8_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/',
+                          prex2 +'nbins12_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/',
+                          prex2 +'nbins18_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/']
+                         ,[prex2 +'nbins25_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/',
+                           prex2 +'nbins35_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/',
+                           prex2 + 'nbins50_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=5_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=4096/'                         ]]
         elif action == COMPRAED_PERCENT:
             save_name = COMPRAED_PERCENT
             #mode =0
@@ -820,7 +820,7 @@ if __name__ == '__main__':
             save_name = ALL_SAMPLES
             mode =3
             str_names = [[prex+'t_32_1.pickle']]
-        #str_names = [[prex2 +'usa5_DataName=MNIST_samples_len=1_layersSizes=[[400, 100, 40, 30, 20]]_learningRate=0.0015_numEpochsInds=41_numRepeats=1_LastEpochsInds=699_num_of_disribuation_samples=1_numEphocs=700_batch=3000/']]
+        #str_names = [[prex2 +'usa5_DataName=MNIST_samples_len=1_layersSizes=[[400, 100, 40, 30, 20]]_learningRate=0.0015_numEpochsInds=41_numRepeats=1_LastEpochsInds=699_num_of_disribuation_samples=1_numepochs=700_batch=3000/']]
         import Tkinter as tk
         import tkFileDialog as filedialog
 
@@ -837,9 +837,9 @@ if __name__ == '__main__':
         str_names = [[('/').join(file_path.split('/')[:-1]) + '/']]
 
 
-        #str_names = [[prex2+ 'usa_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=10_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=3590/']]
-        #str_names = [[prex2 +'usa1_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=10_LastEpochsInds=9998_num_of_disribuation_samples=1_numEphocs=10000_batch=3590/']]
-        #str_names = [['usa8881_DataName=MNIST_samples_len=1_layersSizes=[[20, 15, 10, 10]]_learningRate=0.002_numEpochsInds=40_numRepeats=1_LastEpochsInds=499_num_of_disribuation_samples=1_numEphocs=500_batch=500/']]
+        #str_names = [[prex2+ 'usa_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=10_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=3590/']]
+        #str_names = [[prex2 +'usa1_DataName=var_u_samples_len=1_layersSizes=[[10, 7, 5, 4, 3]]_learningRate=0.0004_numEpochsInds=964_numRepeats=10_LastEpochsInds=9998_num_of_disribuation_samples=1_numepochs=10000_batch=3590/']]
+        #str_names = [['usa8881_DataName=MNIST_samples_len=1_layersSizes=[[20, 15, 10, 10]]_learningRate=0.002_numEpochsInds=40_numRepeats=1_LastEpochsInds=499_num_of_disribuation_samples=1_numepochs=500_batch=500/']]
         if do_plot_action:
             plot_figures(str_names, mode, save_name)
         if do_plot_norms:

@@ -76,14 +76,14 @@ def data_shuffle(data_sets_org, percent_of_train,min_test_data=80, shuffle_data 
     data_sets.test.labels = shuffled_labels[start_test_index:,:]
     return data_sets
 
-def train_and_calc_inf_network(i,j,k,layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads, data_sets_org,
+def train_and_calc_inf_network(i,j,k,layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads, data_sets_org,
                                model_type,percent_of_train,interval_accuracy_display, calc_information, calc_information_last, num_of_bins,
                                interval_information_display,save_ws, rand_int,cov_net):
     """Train the network and calculate it's information"""
     network_name = '{0}_{1}_{2}_{3}'.format(i,j,k, rand_int)
 
     print ('Training network  - {0}'.format(network_name))
-    network = train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads,
+    network = train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads,
                   data_sets_org, model_type, percent_of_train, interval_accuracy_display, network_name, cov_net)
     network['information'] = []
     if calc_information:
@@ -102,7 +102,7 @@ def train_and_calc_inf_network(i,j,k,layerSize, num_of_ephocs, learning_rate_loc
         network['ws'] = 0
     return network
 
-def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads,
+def train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads,
                   data_sets_org, model_type,percent_of_train,interval_accuracy_display,
                   name,covn_net):
     """Train the nework"""
@@ -145,13 +145,13 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
         #Go over the epochs
         k =0
         acc_train_array = 0
-        for j in range(0, num_of_ephocs):
+        for j in range(0, num_of_epochs):
             epochs_grads = []
             if j in indexes:
                 estimted_label[k] = 0
                 w_temp = []
-                #print len(batch_points_all)
-                for i in xrange(0, len(batch_points_all) - 1):
+                #print (len(batch_points_all))
+                for i in range(0, len(batch_points_all) - 1):
                     batch_xs = data_sets_org.data[batch_points_all[i]:batch_points_all[i + 1]]
                     batch_ys = data_sets_org.labels[batch_points_all[i]:batch_points_all[i + 1]]
                     feed_dict_temp = {model.x: batch_xs, model.labels: batch_ys}
@@ -159,7 +159,7 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
                         feed_dict_temp[model.drouput] = 1
                     w_temp_local = sess.run([model.hidden_layers],
                                  feed_dict=feed_dict_temp)
-                    #print i
+                    #print (i)
                     for s in range(len(w_temp_local[0])):
                         if i==0:
                             w_temp.append(w_temp_local[0][s])
@@ -171,7 +171,7 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
                 loss_func_train[k], train_prediction[k] = \
                     sess.run([ model.cross_entropy, model.accuracy],
                              feed_dict=feed_dict_train)
-                print j
+                print (j)
                 loss_func_test[k], test_prediction[k] = \
                     sess.run([model.cross_entropy, model.accuracy],
                              feed_dict=feed_dict_test)
@@ -188,7 +188,7 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
             # Print accuracy every some epochs
             if np.mod(j, interval_accuracy_display) ==1 or interval_accuracy_display ==1:
                 acc_array  =[]
-                for i in xrange(0, len(batch_points_test) - 1):
+                for i in range(0, len(batch_points_test) - 1):
                     batch_xs = data_sets.test.data[batch_points_test[i]:batch_points_test[i + 1]]
                     batch_ys = data_sets.test.labels[batch_points_test[i]:batch_points_test[i + 1]]
                     feed_dict_temp = {model.x: batch_xs, model.labels: batch_ys}
@@ -204,8 +204,8 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
             #Go over the batch_points
             acc_train_array = []
             current_weights =   [[] for _ in range( len(model.weights_all))]
-            for i in xrange(0, len(batch_points) - 1):
-                #print i
+            for i in range(0, len(batch_points) - 1):
+                #print (i)
                 batch_xs = data_sets.train.data[batch_points[i]:batch_points[i + 1]]
                 batch_ys = data_sets.train.labels[batch_points[i]:batch_points[i + 1]]
                 feed_dict = {model.x: batch_xs, model.labels: batch_ys}
